@@ -1,37 +1,109 @@
-# ADR 004: Use Modular Event Stages
+# ADR-004 — Modular Event Blueprints
 
 ## Status
 
-[Insert current status here, e.g., "In Development", "Accepted", etc.]
+Accepted
 
-## Context
+---
 
-The decision to use modular event stages is based on the following considerations:
+# Context
 
-- **Deterministic Orchestration**: Ensuring that every event runs smoothly without unexpected deviations.
-- **Human-in-the-Loop**: Maintaining control and intervention where necessary for optimal outcomes.
-- **LLM Abstraction (Cloud + Local)**: Leveraging both cloud-based and local AI models to handle complex tasks efficiently.
-- **Event-driven Interactions**: Facilitating seamless, real-time interactions with strong auditability for compliance.
-- **Strong Auditability (Decision Log)**: Providing a robust log of decisions for compliance and traceability.
+Corporate events vary significantly in:
+- workflow stages
+- operational requirements
+- participant interaction models
+- approval requirements
+- integration needs
 
-## Decision
+Hardcoded workflows would make the platform:
+- difficult to reuse
+- difficult to evolve
+- operationally rigid
 
-We have decided to use modular event stages due to their ability to meet the above requirements effectively.
+The platform requires reusable orchestration structures that can adapt to different event formats.
 
-## Consequences
+---
 
-### Pros
-1. **Deterministic Orchestration**: Ensures consistent event execution.
-2. **Human-in-the-Loop**: Allows for intervention when necessary.
-3. **LLM Abstraction (Cloud + Local)**: Flexibility in using both cloud and local AI models.
-4. **Event-driven Interactions**: Real-time and approval-based interactions with strong auditability.
-5. **Strong Auditability (Decision Log)**: Comprehensive logging for compliance.
+# Decision
 
-### Cons
-1. **Complexity**: Modular event stages may introduce additional complexity in system design and maintenance.
-2. **Learning Curve**: Developers may need time to learn and adapt to using modular event stages.
-3. **Cost**: There might be associated costs with maintaining a robust modular event stage infrastructure.
+The platform will use modular Event Blueprints.
 
-## Trade-offs
+Each blueprint defines:
+- enabled stages
+- orchestration flow
+- approval requirements
+- interaction capabilities
+- integration configuration
 
-The decision to use modular event stages comes with the trade-off of increased complexity and potential learning curve, but it offers significant benefits in terms of deterministic orchestration, human intervention, LLM abstraction, event-driven interactions, and strong auditability. The pros outweigh the cons given the platform's requirements and goals.
+Stages can be:
+- enabled
+- disabled
+- reused
+- extended
+
+---
+
+# Rationale
+
+Modular blueprints improve:
+- reusability
+- scalability
+- operational flexibility
+- multi-event support
+
+The blueprint model allows:
+- rapid event creation
+- reusable orchestration patterns
+- standardized operational flows
+
+---
+
+# Consequences
+
+## Positive
+
+- reusable orchestration structures
+- configurable workflows
+- simplified event creation
+- scalable event management
+
+---
+
+## Negative
+
+- increased orchestration configuration complexity
+- blueprint validation becomes necessary
+- workflow compatibility management required
+
+---
+
+# Alternatives Considered
+
+## Hardcoded Event Workflows
+
+Rejected because:
+- poor reuse
+- weak scalability
+- difficult maintenance
+
+---
+
+## Fully Dynamic Runtime Workflow Generation
+
+Rejected because:
+- governance complexity
+- weak determinism
+- operational unpredictability
+
+---
+
+# Trade-offs
+
+The platform prioritizes:
+- reusable orchestration
+- controlled flexibility
+- deterministic execution
+
+Over:
+- unrestricted workflow generation
+- fully dynamic orchestration
