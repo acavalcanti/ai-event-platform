@@ -5,145 +5,238 @@
 The AI Event Platform enforces a strict separation between:
 - AI reasoning
 - deterministic execution
+- governance enforcement
 
-This separation prevents uncontrolled agent behavior and preserves governance, auditability, and operational safety.
+This architecture prevents uncontrolled agent behavior and preserves:
+- auditability
+- operational safety
+- deterministic orchestration
+- enterprise governance
 
 ---
 
 # Architectural Principle
 
-LLMs are responsible for:
-- generating suggestions
-- summarizing information
-- classifying interactions
-- assisting operators
-- proposing actions
+LLMs never enforce governance or authorization rules.
 
-LLMs are NOT responsible for:
-- directly mutating business state
-- executing external side effects
-- bypassing governance
-- autonomously changing workflow topology
+AI systems may generate recommendations and operational proposals, but governance decisions are always enforced by deterministic services.
+
+The platform follows a system-first architecture where:
+- reasoning remains probabilistic
+- execution remains deterministic
+- governance remains authoritative
 
 ---
 
-# Deterministic Execution Layer
+# Separation of Responsibilities
 
-All business-critical actions are executed by deterministic services.
+## AI Reasoning Layer
 
-Examples:
-- stage transitions
-- approval enforcement
-- event lifecycle changes
-- external publishing
-- audit persistence
-- notification dispatch
+The AI reasoning layer is responsible for:
+- recommendations
+- summarization
+- interaction classification
+- operational assistance
+- proposal generation
 
-The deterministic execution layer validates all proposed actions before execution.
-
----
-
-# AI Reasoning Scope
-
-## Allowed AI Responsibilities
-
-### Operational Recommendations
-
-Examples:
-- suggest agenda optimizations
-- summarize pending approvals
-- identify engagement trends
-
----
-
-### Interaction Classification
-
-Examples:
-- categorize questions
-- detect inappropriate content
-- classify uploaded media
-
----
-
-### Copilot Assistance
-
-Examples:
-- answer operator questions
+The reasoning layer may:
+- analyze workflow context
+- classify interactions
 - summarize event status
-- explain workflow state
+- suggest operational actions
+
+The reasoning layer never:
+- mutates business state directly
+- bypasses governance
+- executes external side effects
+- authorizes workflow transitions
+- validates permissions
 
 ---
 
-# Restricted AI Responsibilities
+## Deterministic Execution Layer
 
-The following operations require deterministic validation or human approval.
+The deterministic execution layer is responsible for:
+- workflow execution
+- policy validation
+- authorization
+- approval enforcement
+- external side effects
+- orchestration continuation
 
-## Restricted Actions
-
-- publishing external content
-- changing event lifecycle state
-- bypassing approvals
-- modifying governance rules
-- triggering external integrations
-- changing workflow topology
-
----
-
-# Human-in-the-Loop Boundaries
-
-Certain actions require explicit human approval.
+This layer validates all proposals before execution.
 
 Examples:
-- publishing attendee photos
-- posting to social media
-- enabling public audience interactions
-- approving executive workflow transitions
-
-The orchestration engine pauses execution until approval is received.
+- publishing interactions
+- stage transitions
+- approval workflows
+- notification dispatch
+- external integrations
 
 ---
 
 # Proposal Execution Model
 
+## Proposal Lifecycle
+
 Agents generate proposals instead of directly executing actions.
 
-Example:
+Example proposal:
 
 ```text
-Agent Proposal:
-"Publish approved interaction to Instagram"
+Publish approved attendee interaction to Instagram
 ```
 
-The deterministic execution layer validates:
-- permissions
-- governance policies
-- approval state
-- idempotency
-- operational constraints
+The proposal lifecycle:
 
-Only after validation is the action executed.
+```text
+Agent Proposal
+    ↓
+Policy Validation
+    ↓
+Approval Validation
+    ↓
+Deterministic Authorization
+    ↓
+Async Execution Worker
+    ↓
+Execution Result
+```
 
 ---
 
-# Governance Integration
+# Proposal Validation
 
-All AI-generated proposals are recorded in the Decision Log.
+Before execution, deterministic services validate:
+- workflow consistency
+- governance policies
+- user permissions
+- orchestration version
+- approval freshness
+- idempotency constraints
 
-Audit records include:
-- originating agent
+Only validated proposals may proceed to execution.
+
+---
+
+# Human-in-the-Loop Boundaries
+
+Certain operations require explicit human approval.
+
+Examples:
+- public social media publishing
+- executive workflow transitions
+- external content publication
+- attendee-generated content approval
+
+The orchestration engine pauses execution until:
+- approval is granted
+- approval expires
+- workflow state changes
+- execution is rejected
+
+---
+
+# Governance Enforcement
+
+Governance is enforced exclusively through deterministic policy services.
+
+Examples:
+- RBAC validation
+- future ABAC evaluation
+- approval authorization
+- orchestration validation
+- policy-based execution blocking
+
+LLMs may assist operators by:
+- summarizing workflow state
+- explaining orchestration context
+- generating operational recommendations
+
+LLMs never:
+- approve actions
+- authorize users
+- validate permissions
+- enforce governance policies
+
+---
+
+# Workflow Safety
+
+The architecture prevents:
+- autonomous workflow mutation
+- unrestricted external execution
+- self-modifying orchestration
+- uncontrolled side effects
+- probabilistic governance
+
+This ensures:
+- bounded autonomy
+- replay safety
+- operational predictability
+- governance visibility
+
+---
+
+# Explainability
+
+The platform prioritizes explainability-first orchestration.
+
+Human operators must be able to inspect:
 - workflow context
+- proposal summaries
+- approval state
+- policy validation results
+- orchestration history
+
+AI-generated proposals include:
+- proposal summary
+- orchestration context
+- reasoning summary
+- workflow references
+
+The platform avoids storing unrestricted chain-of-thought traces.
+
+---
+
+# Auditability
+
+All proposal lifecycles are recorded in the Decision Log.
+
+Stored metadata includes:
+- proposal identifier
+- originating workflow
+- policy validation result
 - approval outcome
 - execution result
-- timestamp
+- timestamps
+- orchestration metadata
+
+This supports:
+- governance visibility
+- operational replay
+- forensic analysis
+- enterprise auditability
+
+---
+
+# Future Evolution
+
+Future architecture enhancements may include:
+- Open Policy Agent (OPA)
+- policy-as-code
+- adaptive governance
+- risk-aware orchestration
+- multi-signature approvals
 
 ---
 
 # Design Principles
 
-The reasoning boundary exists to ensure:
-- deterministic workflows
-- explainability
+The reasoning boundary architecture prioritizes:
+- deterministic governance
+- bounded autonomy
 - operational safety
-- governance enforcement
-- bounded agent autonomy
+- replayability
+- explainability
 - enterprise trust

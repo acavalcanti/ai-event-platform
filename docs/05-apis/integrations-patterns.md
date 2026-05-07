@@ -2,76 +2,166 @@
 
 ## Overview
 
-The AI Event Platform integrates with external systems using asynchronous and deterministic integration patterns.
+The AI Event Platform integrates with external systems through asynchronous and deterministic integration patterns.
 
-The platform avoids direct execution of external side effects from orchestration nodes.
+The architecture isolates:
+- orchestration execution
+- external side effects
+- webhook ingestion
+- external API communication
+
+This prevents:
+- orchestration blocking
+- retry storms
+- external timeout propagation
+- distributed execution instability
 
 ---
 
-# Integration Principles
+# Architectural Principles
 
 The integration layer prioritizes:
-- resiliency
-- idempotency
-- observability
+- asynchronous execution
+- deterministic processing
 - retry safety
 - fault isolation
-- asynchronous execution
+- idempotency
+- replayability
+- operational resilience
 
 ---
 
-# Outbox Pattern
+# Integration Architecture
+
+The platform separates:
+- orchestration
+- domain state mutation
+- external integration execution
+
+Agents and orchestration nodes never execute external integrations directly.
+
+Instead:
+1. agents generate proposals
+2. deterministic services validate proposals
+3. intents are persisted
+4. workers execute integrations asynchronously
+
+---
+
+# Transactional Outbox Pattern
 
 ## Overview
 
-Agents and orchestration flows never call external APIs directly.
-
-Instead:
-1. an intent is generated
-2. the intent is persisted to an Outbox table
-3. deterministic workers execute the integration
+The platform uses the Transactional Outbox Pattern to ensure consistency between:
+- domain state
+- audit records
+- orchestration events
+- external integration intents
 
 ---
 
-# Example Flow
+# Atomic Persistence
+
+The component responsible for mutating domain state also owns the outbox transaction.
+
+Example:
 
 ```text
-Interaction Approved
-    ↓
-Create Publish Intent
-    ↓
-Persist Outbox Record
-    ↓
-Worker Consumes Intent
-    ↓
-Instagram API Call
-    ↓
-Persist Delivery Result
+BEGIN TRANSACTION
+
+- update interaction state
+- persist audit record
+- persist orchestration event
+- persist outbox event
+
+COMMIT
 ```
+
+This guarantees:
+- no dual-write inconsistency
+- replay safety
+- deterministic recovery
+- orchestration consistency
 
 ---
 
-# Benefits
+# Outbox Workers
 
-The Outbox pattern provides:
-- retry safety
-- delivery resilience
-- external API isolation
-- replayability
-- idempotent execution
+Deterministic workers consume outbox events asynchronously.
+
+Worker responsibilities:
+- external API execution
+- retry management
+- idempotency validation
+- delivery tracking
+- dead-letter routing
+
+Examples:
+- Instagram publishing worker
+- WhatsApp notification worker
+- CRM synchronization worker
+- Webhook dispatch worker
+
+---
+
+# Asynchronous Ingestion
+
+## Webhook Ingestion Model
+
+External systems must never block orchestration execution.
+
+Webhook ingestion flow:
+
+```text
+External System
+    ↓
+Interaction API
+    ↓
+Persist Interaction
+    ↓
+Persist Outbox Event
+    ↓
+HTTP 202 Accepted
+    ↓
+Async Worker Processing
+```
+
+This prevents:
+- webhook timeout propagation
+- retry amplification
+- orchestration thread exhaustion
+
+---
+
+# HTTP Response Strategy
+
+External ingestion endpoints should return:
+
+```http
+202 Accepted
+```
+
+instead of synchronous processing responses.
+
+This acknowledges receipt without blocking orchestration execution.
 
 ---
 
 # Idempotency
 
-## Webhook Idempotency
+## Idempotency Keys
 
-All external webhook requests must include idempotency keys.
+All external ingestion requests must include:
+
+```text
+Idempotency-Key
+```
 
 The platform validates:
-- duplicate webhook delivery
+- duplicated webhook delivery
 - replay attacks
-- duplicated interaction processing
+- duplicated orchestration execution
+- duplicated interaction ingestion
 
 ---
 
@@ -82,36 +172,65 @@ The following operations must be idempotent:
 - social media publishing
 - notification dispatch
 - approval processing
+- webhook dispatch
 
 ---
 
-# Asynchronous Boundaries
+# Reliable Queue Pattern
 
-External systems are isolated behind asynchronous workers.
+## Queueing Strategy
 
-Examples:
-- WhatsApp integration
-- Instagram publishing
-- CRM synchronization
-- email notifications
+The platform uses reliable queueing semantics to avoid message loss.
+
+Initial recommendation:
+- Redis Streams
+
+Future scalability options:
+- Kafka
+- RabbitMQ
+
+---
+
+# Reliable Delivery
+
+Workers acknowledge events only after successful processing.
+
+Events remain recoverable until acknowledgment is completed.
 
 This prevents:
-- orchestration blocking
-- external timeout propagation
-- webhook retry amplification
-- thread exhaustion
+- lost integrations
+- dropped orchestration events
+- partial external execution
 
 ---
 
-# Queueing Strategy
+# Visibility Timeout
 
-Recommended queueing technologies:
-- Redis Queue
-- RabbitMQ
-- Kafka (future scalability)
+If a worker crashes during processing:
+- the event becomes visible again
+- another worker may resume processing
 
-Initial implementation recommendation:
-- Redis-based queueing
+This ensures:
+- fault tolerance
+- delivery resiliency
+- worker recovery
+
+---
+
+# Dead-Letter Queues
+
+Failed events exceeding retry limits are moved to Dead-Letter Queues (DLQ).
+
+Examples:
+- invalid webhook payloads
+- external API failures
+- policy validation failures
+- serialization failures
+
+DLQs support:
+- operational debugging
+- replay workflows
+- forensic analysis
 
 ---
 
@@ -123,34 +242,85 @@ Retries must be:
 - deterministic
 - idempotent
 
-The retry layer must support:
+The retry layer supports:
 - exponential backoff
-- dead-letter queues
 - retry visibility
+- replay support
+- dead-letter escalation
 
 ---
 
-# Failure Isolation
+# External Integration Isolation
 
-External integration failures must never corrupt orchestration state.
+External systems are isolated from orchestration runtime execution.
 
 Examples:
-- Instagram outage
-- WhatsApp timeout
-- CRM throttling
+- WhatsApp APIs
+- Instagram APIs
+- CRM systems
+- email providers
+- customer portals
 
-Failures are isolated to deterministic workers.
+Failures must never:
+- corrupt orchestration state
+- block workflow execution
+- mutate business state unpredictably
+
+---
+
+# Webhook Security
+
+## Payload Signing
+
+Outbound webhooks use HMAC payload signing.
+
+The receiving system validates:
+- payload authenticity
+- integrity
+- origin trust
+
+---
+
+# Webhook Metadata
+
+Webhook metadata includes:
+- event identifier
+- delivery identifier
+- retry count
+- delivery timestamp
+- signature metadata
+
+---
+
+# Orchestration Isolation
+
+LangGraph orchestration nodes never:
+- wait for external delivery confirmation
+- execute blocking external API calls
+- perform long-running network operations
+
+Instead:
+- orchestration generates intents
+- deterministic workers execute integrations
+- orchestration receives completion events asynchronously
 
 ---
 
 # Observability
 
-The integration layer must expose:
+The integration layer exposes:
 - queue depth
 - retry metrics
 - delivery success rates
-- external latency
 - failure rates
+- worker health
+- external API latency
+
+This supports:
+- operational visibility
+- replay debugging
+- runtime monitoring
+- orchestration diagnostics
 
 ---
 
@@ -159,6 +329,7 @@ The integration layer must expose:
 The integration architecture prioritizes:
 - deterministic orchestration
 - asynchronous execution
-- operational resilience
-- integration fault isolation
+- delivery resiliency
+- fault isolation
 - replay safety
+- enterprise operational stability

@@ -2,11 +2,13 @@
 
 ## Overview
 
-The AI Event Platform separates orchestration state from business domain state to ensure deterministic execution, operational resilience, and auditability.
+The AI Event Platform separates orchestration runtime state from business domain state to ensure deterministic execution, operational resilience, and governance visibility.
 
-The orchestration layer is responsible for workflow coordination and resumability.
-
-The domain layer remains the source of truth for business operations.
+The architecture follows a system-first orchestration model where:
+- business state remains authoritative
+- orchestration state remains resumable
+- external side effects are isolated
+- workflow execution is deterministic
 
 ---
 
@@ -14,19 +16,22 @@ The domain layer remains the source of truth for business operations.
 
 ## Domain State (Source of Truth)
 
-The primary source of truth is maintained by application services and persisted in the domain database.
+Business domain state is the authoritative source of truth.
 
-The domain database stores:
-- event lifecycle state
-- participant registrations
-- approvals
-- interactions
-- audit records
-- vendor coordination state
-- operational metadata
+Domain state is owned by application services and persisted in the primary transactional database.
 
 Recommended persistence:
 - PostgreSQL
+
+The domain state includes:
+- event lifecycle state
+- stage state
+- participant registrations
+- approvals
+- interaction metadata
+- vendor coordination state
+- orchestration decisions
+- audit records
 
 ---
 
@@ -34,46 +39,31 @@ Recommended persistence:
 
 The LangGraph Orchestrator maintains orchestration runtime state.
 
-This state exists to support:
+This state exists exclusively to support:
 - workflow execution
 - resumability
-- checkpoints
-- HITL interruptions
 - orchestration coordination
+- checkpoint persistence
+- HITL interruptions
 
 The orchestration state is NOT the source of truth for business operations.
 
 Examples:
 - current workflow node
-- graph execution path
-- pending interruption state
+- execution path
 - retry metadata
+- interruption metadata
 - orchestration context
+- graph traversal state
 
 Recommended persistence:
-- LangGraph Postgres Checkpointer
-
----
-
-# State Synchronization Strategy
-
-## Principle
-
-Business state changes must be persisted before orchestration checkpoints are considered committed.
-
-The system avoids dual-write inconsistency by ensuring:
-
-1. Domain state persistence
-2. Audit log persistence
-3. Orchestration checkpoint update
-
-Only after successful persistence should workflow progression continue.
+- LangGraph PostgreSQL Checkpointer
 
 ---
 
 # Shared Workflow State
 
-The workflow state object contains orchestration-specific execution metadata.
+The orchestration layer maintains a shared workflow state object.
 
 Example conceptual schema:
 
@@ -81,35 +71,165 @@ Example conceptual schema:
 class EventWorkflowState(TypedDict):
     event_id: str
     workflow_id: str
+    orchestration_version: int
     current_stage: str
     current_node: str
+    orchestration_status: str
     pending_approval: bool
     approval_owner: str | None
+    interruption_reason: str | None
     interaction_queue: list
-    execution_history: list
     retry_count: int
-    orchestration_status: str
+    execution_history: list
 ```
+---
+
+# Transactional Outbox Pattern
+
+## Overview
+
+The platform uses the Transactional Outbox Pattern to prevent dual-write inconsistencies between:
+- domain state
+- orchestration state
+- external integrations
+
+---
+
+# Atomic Transaction Boundary
+
+Business state updates and orchestration events must be persisted atomically.
+
+Example transaction:
+
+```text
+BEGIN TRANSACTION
+
+- update event state
+- persist audit log
+- persist orchestration event
+- persist outbox event
+
+COMMIT
+```
+
+This guarantees:
+- consistent workflow progression
+- replay safety
+- failure recovery
+- deterministic orchestration
+
+---
+
+# Orchestration Event Relay
+
+The LangGraph Orchestrator is updated asynchronously through orchestration events.
+
+The orchestration relay:
+1. consumes orchestration events
+2. hydrates orchestration state
+3. resumes workflow execution
+4. updates orchestration checkpoints
+
+This prevents:
+- synchronous orchestration coupling
+- dual-write failures
+- orchestration blocking
 
 ---
 
 # Human-in-the-Loop Interruptions
 
+## Interruption Model
+
 Approval workflows use LangGraph interruption checkpoints.
 
 Examples:
 - interaction publishing approval
-- executive approval
-- stage transition approval
+- executive workflow approval
+- social media publishing approval
+- workflow escalation approval
 
 When interrupted:
 - orchestration state is checkpointed
 - workflow execution pauses
 - domain state remains persisted
+- interruption metadata is stored
 
-When resumed:
-- orchestration state is hydrated
-- workflow execution continues from checkpoint
+---
+
+# Workflow Resumption
+
+When approval is received:
+1. the Policy Engine validates approval freshness
+2. orchestration version checks are performed
+3. workflow state is hydrated
+4. orchestration execution resumes
+
+---
+
+# Approval Freshness Validation
+
+Approvals may become stale if:
+- workflow state changes
+- event stages advance
+- orchestration versions diverge
+
+The Policy Engine validates:
+- orchestration version
+- workflow consistency
+- approval expiration
+- replay safety
+
+before resuming execution.
+
+---
+
+# Optimistic Concurrency Control
+
+The platform uses Optimistic Concurrency Control (OCC) to prevent orchestration conflicts.
+
+Domain objects include:
+- version identifiers
+- orchestration revision metadata
+
+Updates are rejected if:
+- workflow state changed during execution
+- orchestration versions diverged
+- stale orchestration resumed
+
+This prevents:
+- race conditions
+- stale approvals
+- concurrent workflow corruption
+
+---
+
+# Consistency Model
+
+## Strong Consistency
+
+Strong consistency is enforced inside transactional domain operations.
+
+Examples:
+- approval persistence
+- audit logging
+- lifecycle transitions
+- orchestration event creation
+
+---
+
+## Eventual Consistency
+
+Eventual consistency is used between:
+- orchestration runtime state
+- asynchronous workers
+- external integrations
+- notification systems
+
+This architecture prioritizes:
+- resilience
+- replayability
+- operational isolation
 
 ---
 
@@ -117,44 +237,49 @@ When resumed:
 
 ## Crash Recovery
 
-If orchestration crashes:
-- workflow state is restored from checkpoint
+If orchestration execution crashes:
+- orchestration state is restored from checkpoints
 - domain state remains authoritative
-- incomplete external actions are retried through deterministic workers
+- pending outbox events are replayed
+- deterministic workers resume execution
 
 ---
 
-## Retry Strategy
+# Replay Safety
+
+All orchestration operations must be replay-safe.
+
+Replay safety is enforced through:
+- idempotency keys
+- orchestration version checks
+- transactional outbox events
+- deterministic execution workers
+
+---
+
+# Retry Strategy
 
 Retries must be:
+- bounded
+- observable
 - idempotent
 - deterministic
-- externally observable
 
-External integrations must never be retried directly from LLM reasoning nodes.
+The platform avoids direct retry execution from:
+- LLM nodes
+- orchestration reasoning flows
 
----
-
-# Consistency Model
-
-The platform uses eventual consistency between:
-- orchestration runtime state
-- asynchronous external integrations
-
-The platform uses strong consistency for:
-- approvals
-- audit records
-- event lifecycle transitions
-- governance operations
+Retries are delegated to deterministic workers.
 
 ---
 
 # Design Principles
 
-The workflow state model prioritizes:
-- deterministic execution
+The workflow state architecture prioritizes:
+- deterministic orchestration
 - resumability
-- operational traceability
-- governance visibility
-- replayability
 - fault isolation
+- governance visibility
+- replay safety
+- operational resilience
+- distributed systems correctness
