@@ -69,19 +69,7 @@ Approved interactions are:
 
 ---
 
-### 5. Governance & Auditability
-
-The Governance Agent tracks:
-- approvals
-- orchestration decisions
-- workflow transitions
-- interaction outcomes
-
-All actions are recorded in the Decision Log.
-
----
-
-### 6. AI Copilot Usage
+### 5. AI Copilot Usage
 
 Operators query the AI Copilot for:
 - workflow status

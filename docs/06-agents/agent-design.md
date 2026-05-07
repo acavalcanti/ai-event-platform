@@ -28,14 +28,6 @@ Processes real-time interactions, approval workflows, and external communication
 
 ---
 
-### Governance Agent
-
-Ensures auditability, compliance, RBAC enforcement, and policy validation across orchestration flows.
-
----
-
-## Responsibilities
-
 ## Responsibilities
 
 - **Orchestrator Agent**: Coordinates workflow execution and agent communication using LangGraph orchestration.
@@ -45,8 +37,6 @@ Ensures auditability, compliance, RBAC enforcement, and policy validation across
 - **Template Management Agent**: Handles reusable event templates, cloning, and multi-event orchestration support.
 
 - **Interaction Agent**: Processes real-time interactions, approval workflows, and external communication pipelines.
-
-- **Governance Agent**: Ensures compliance, auditability, RBAC enforcement, and policy validation.
 
 ## Shared State
 
