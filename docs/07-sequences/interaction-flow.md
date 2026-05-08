@@ -2,15 +2,16 @@
 
 ## Overview
 
-This sequence describes the end-to-end asynchronous interaction workflow for the initial vertical slice.
+This sequence describes the end-to-end orchestration flow for the initial vertical slice.
 
 The workflow demonstrates:
 - asynchronous ingestion
 - deterministic governance
 - HITL approvals
 - orchestration suspend/resume
-- outbox execution
-- external integration isolation
+- proposal persistence
+- replay-safe execution
+- asynchronous side-effect execution
 
 ---
 
@@ -35,7 +36,7 @@ InteractionAPI-->>ExternalSystem: HTTP 202 Accepted
 Worker->>Outbox: Consume ingestion event
 Worker->>LangGraph: Start workflow execution
 
-LangGraph->>DomainDB: Load current interaction state
+LangGraph->>DomainDB: Load latest interaction state
 LangGraph->>LangGraph: Generate proposal
 
 LangGraph->>DomainDB: Persist proposal
@@ -43,26 +44,42 @@ LangGraph->>LangGraph: Checkpoint proposal state
 
 LangGraph->>PolicyEngine: Validate proposal
 
-PolicyEngine-->>LangGraph: HITL approval required
+alt Approval Required
 
-LangGraph->>DomainDB: Persist interruption state
-LangGraph->>LangGraph: Suspend workflow
+    PolicyEngine-->>LangGraph: HITL approval required
 
-HumanApprover->>PolicyEngine: Approve proposal
+    LangGraph->>DomainDB: Persist interruption metadata
+    LangGraph->>LangGraph: Suspend workflow
 
-PolicyEngine->>DomainDB: Persist approval
-PolicyEngine->>Outbox: Persist publish intent
+    HumanApprover->>PolicyEngine: Approve proposal
 
-Worker->>Outbox: Consume publish intent
-Worker->>InstagramAPI: Publish content
+    PolicyEngine->>DomainDB: Persist approval
+    PolicyEngine->>Outbox: Persist publish intent
 
-InstagramAPI-->>Worker: Publish confirmation
+    Worker->>Outbox: Consume publish intent
+    Worker->>InstagramAPI: Publish content
 
-Worker->>Outbox: Persist completion event
+    InstagramAPI-->>Worker: Publish confirmation
 
-Worker->>LangGraph: Resume workflow
+    Worker->>Outbox: Persist completion event
 
-LangGraph->>DomainDB: Reload current state
-LangGraph->>LangGraph: Validate orchestration version
-LangGraph->>LangGraph: Complete workflow
+    Worker->>LangGraph: Resume workflow
+
+    LangGraph->>DomainDB: Reload latest interaction state
+    LangGraph->>LangGraph: Validate orchestration version
+    LangGraph->>LangGraph: Complete workflow
+
+else Proposal Rejected
+
+    PolicyEngine-->>LangGraph: Proposal rejected
+
+    LangGraph->>DomainDB: Persist rejection reason
+    LangGraph->>LangGraph: Route to correction flow
+
+    LangGraph->>LangGraph: Generate revised proposal
+
+    LangGraph->>DomainDB: Persist revised proposal
+    LangGraph->>LangGraph: Checkpoint revised proposal
+
+end
 ```

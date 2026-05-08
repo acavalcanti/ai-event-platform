@@ -63,14 +63,19 @@ Recommended persistence:
 
 # Shared Workflow State
 
+## Overview
+
 The LangGraph orchestration state remains intentionally minimal.
 
 The orchestration layer stores only execution metadata required for:
 - resumability
 - orchestration continuity
 - suspend/resume semantics
+- replay coordination
 
 Business state is never duplicated inside orchestration checkpoints.
+
+Business state remains authoritative in PostgreSQL domain services.
 
 ---
 
@@ -82,9 +87,31 @@ class EventWorkflowState(TypedDict):
     event_id: str
     orchestration_version: int
     current_node: str
+    interaction_state: str
     suspended: bool
     interruption_id: str | None
+    proposal_id: str | None
 ```
+
+---
+
+# Minimal Orchestration Philosophy
+
+The orchestration runtime does not cache mutable business state.
+
+The orchestration state contains only:
+- execution references
+- orchestration metadata
+- replay coordination metadata
+
+Examples of excluded business state:
+- approval status
+- interaction payloads
+- participant state
+- workflow decisions
+- external execution status
+
+All business state is reloaded from PostgreSQL before node execution.
 
 ---
 
@@ -97,12 +124,118 @@ Examples:
 - approval state
 - workflow transitions
 - orchestration decisions
+- external execution state
 
 This prevents:
 - stale orchestration state
 - split-brain execution
 - replay inconsistencies
 - checkpoint corruption
+
+---
+
+# Proposal Persistence Boundary
+
+Proposal generation introduces a deterministic replay boundary.
+
+The workflow sequence is:
+
+```text
+Generate Proposal
+    ↓
+Persist Proposal
+    ↓
+Checkpoint Workflow State
+    ↓
+Continue Orchestration
+```
+
+This guarantees:
+- proposal durability
+- replay-safe execution
+- deterministic recovery
+- proposal consistency
+
+LLM reasoning nodes never re-generate proposals after successful persistence.
+
+---
+
+# Ambiguous Completion Handling
+
+Certain failures may produce ambiguous execution states.
+
+Examples:
+- LLM timeout
+- interrupted provider response
+- uncertain external execution state
+- network interruption during reasoning
+
+These cases transition the interaction into:
+
+```text
+PENDING_VERIFICATION
+```
+
+---
+
+# Pending Verification Semantics
+
+`PENDING_VERIFICATION` prevents unsafe replay behavior.
+
+The workflow pauses until deterministic verification confirms:
+- proposal persistence state
+- execution completion state
+- provider completion state
+- replay safety guarantees
+
+This prevents:
+- duplicated reasoning
+- duplicated execution
+- inconsistent orchestration recovery
+
+---
+
+# Replay Coordination
+
+Replay coordination uses:
+- orchestration version validation
+- proposal persistence checks
+- deterministic transition validation
+- OCC version checks
+
+Replay execution is rejected if:
+- orchestration diverges
+- stale workflow state detected
+- transition consistency violated
+
+---
+
+# Suspend/Resume Coordination
+
+Workflow suspension stores:
+- workflow_execution_id
+- orchestration_version
+- interruption metadata
+- proposal references
+
+Workflow resume always:
+1. reloads latest business state
+2. validates orchestration consistency
+3. validates OCC version
+4. validates replay safety
+5. resumes deterministic execution
+
+---
+
+# Design Principles
+
+The workflow state architecture prioritizes:
+- deterministic orchestration
+- replay-safe execution
+- resumability
+- orchestration isolation
+- governance visibility
+- distributed systems correctness
 
 ---
 
