@@ -22,7 +22,7 @@ Core business services responsible for event lifecycle management.
 Manages event blueprints, stages, and execution lifecycle.
 
 #### Template Service
-Handles reusable event templates, cloning, and multi-event support.
+Manages reusable event workflow definitions and orchestration templates.
 
 #### Interaction Service
 Processes real-time interactions, approval workflows, and external communication pipelines.
@@ -73,7 +73,7 @@ The platform is built around several key components that work together to achiev
 - **Template Service**: Handles reusable templates and multi-event support.
 - **Interaction Service**: Facilitates real-time and approval-based interactions.
 - **Governance Service** ensures compliance, auditability, RBAC enforcement, and policy validation across orchestration workflows.
-- **AI Orchestration Layer**: Orchestrates the multi-agent system using LangGraph.
+- **AI Orchestration Layer**: Orchestrates the agent system using LangGraph.
 
 ## System Flow
 
@@ -88,7 +88,7 @@ The AI Event Platform follows a structured flow to ensure seamless event orchest
    - The **Governance Service** ensures compliance, auditability, RBAC enforcement, and policy validation across orchestration workflows.
 
 3. **Orchestration**:
-   - The **AI Orchestration Layer** uses LangGraph for deterministic orchestration, coordinating the multi-agent system efficiently.
+   - The **AI Orchestration Layer** uses LangGraph for deterministic orchestration, coordinating the agent system efficiently.
 
 ## Shared State & Decision Log
 

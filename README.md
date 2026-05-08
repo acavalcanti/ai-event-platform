@@ -18,14 +18,14 @@ This project explores how multi-agent AI systems can orchestrate these workflows
 The platform is built on a layered architecture that ensures scalability, reliability, and ease of maintenance:
 
 - **Event Service Layer**: Manages the creation and management of event blueprints.
-- **Template Service Layer**: Handles reusable templates for events with multi-event support.
+- **Template Service Layer**: Manages reusable event workflow definitions and orchestration templates.
 - **Interaction Service Layer**: Facilitates real-time and approval-based interactions during events.
 - **Governance Service Layer**: Ensures compliance and auditability through governance mechanisms.
-- **AI Orchestration Layer**: Orchestrates the multi-agent system using LangGraph for deterministic orchestration.
+- **AI Orchestration Layer**: Orchestrates the system using LangGraph for deterministic orchestration.
 
 ## Architectural Goals
 
-The AI Event Platform is designed to explore how multi-agent systems can coordinate complex operational workflows involving:
+The AI Event Platform is designed to explore how agent systems can coordinate complex operational workflows involving:
 
 - multiple stakeholders
 - real-time interactions

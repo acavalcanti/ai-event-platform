@@ -83,7 +83,7 @@ This architecture reduces the risk of:
 
 # Alternatives Considered
 
-## Emergent Multi-Agent Systems
+## Emergent Agent Systems
 
 Rejected because:
 - difficult to govern

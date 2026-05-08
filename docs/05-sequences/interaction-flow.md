@@ -61,6 +61,15 @@ alt Approval Required
 
     InstagramAPI-->>Worker: Publish confirmation
 
+    alt Publish Failed
+        Worker->>DomainDB: Persist FAILED state
+        Worker->>LangGraph: Resume failure flow
+        LangGraph->>LangGraph: Route to CorrectionNode
+
+    else Publish Succeeded
+        Worker->>Outbox: Persist completion event
+    end
+
     Worker->>Outbox: Persist completion event
 
     Worker->>LangGraph: Resume workflow

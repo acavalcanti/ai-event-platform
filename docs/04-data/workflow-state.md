@@ -87,7 +87,6 @@ class EventWorkflowState(TypedDict):
     event_id: str
     orchestration_version: int
     current_node: str
-    interaction_state: str
     suspended: bool
     interruption_id: str | None
     proposal_id: str | None
