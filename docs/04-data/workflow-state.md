@@ -63,25 +63,47 @@ Recommended persistence:
 
 # Shared Workflow State
 
-The orchestration layer maintains a shared workflow state object.
+The LangGraph orchestration state remains intentionally minimal.
 
-Example conceptual schema:
+The orchestration layer stores only execution metadata required for:
+- resumability
+- orchestration continuity
+- suspend/resume semantics
+
+Business state is never duplicated inside orchestration checkpoints.
+
+---
+
+# Example Workflow State
 
 ```python
 class EventWorkflowState(TypedDict):
+    workflow_execution_id: str
     event_id: str
-    workflow_id: str
     orchestration_version: int
-    current_stage: str
     current_node: str
-    orchestration_status: str
-    pending_approval: bool
-    approval_owner: str | None
-    interruption_reason: str | None
-    interaction_queue: list
-    retry_count: int
-    execution_history: list
+    suspended: bool
+    interruption_id: str | None
 ```
+
+---
+
+# State Hydration
+
+Each orchestration node reloads the latest business state directly from the Domain Database before execution.
+
+Examples:
+- interaction state
+- approval state
+- workflow transitions
+- orchestration decisions
+
+This prevents:
+- stale orchestration state
+- split-brain execution
+- replay inconsistencies
+- checkpoint corruption
+
 ---
 
 # Transactional Outbox Pattern

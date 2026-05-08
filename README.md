@@ -40,6 +40,24 @@ The platform prioritizes:
 - scalability
 - human oversight
 
+# Current Implementation Focus
+
+The current implementation milestone is the Vertical Slice architecture described in:
+
+```text
+/docs/vertical-slice.md
+```
+
+This slice validates:
+- deterministic orchestration
+- bounded AI reasoning
+- asynchronous execution
+- HITL workflows
+- replay-safe execution
+- governance enforcement
+
+The project intentionally prioritizes architectural correctness and orchestration semantics before broader platform expansion.
+
 ## Status
 
 Architecture and design phase.
