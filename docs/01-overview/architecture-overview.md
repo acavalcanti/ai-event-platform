@@ -45,7 +45,7 @@ Components:
 
 ### Shared State & Decision Layer
 
-Stores orchestration state, interaction state, and decision logs used by orchestration workflows and governance processes
+Stores orchestration state, interaction state, and decision logs used by orchestration workflows and governance processes.
 
 Components:
 - Event State

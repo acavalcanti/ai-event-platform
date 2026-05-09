@@ -25,7 +25,7 @@ The platform is built on a layered architecture that ensures scalability, reliab
 
 ## Architectural Goals
 
-The AI Event Platform is designed to explore how agent systems can coordinate complex operational workflows involving:
+The AI Event Platform is designed to explore how deterministic AI-assisted workflows can coordinate complex operational processes involving:
 
 - multiple stakeholders
 - real-time interactions
