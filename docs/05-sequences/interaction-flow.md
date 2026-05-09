@@ -70,8 +70,6 @@ alt Approval Required
         Worker->>Outbox: Persist completion event
     end
 
-    Worker->>Outbox: Persist completion event
-
     Worker->>LangGraph: Resume workflow
 
     LangGraph->>DomainDB: Reload latest interaction state

@@ -143,19 +143,11 @@ Validation includes:
 
 # Decision Logging
 
-All governance decisions are persisted in the Decision Log.
+All governance decisions are persisted through the shared Decision Log schema defined in:
 
-Stored metadata includes:
-- proposal identifier
-- workflow identifier
-- policy result
-- approver identity
-- execution outcome
-- timestamps
-- orchestration context
-- reasoning summary
+`docs/07-governance/audit.md`
 
-The Decision Log supports:
+The Decision Log provides:
 - auditability
 - replayability
 - governance visibility

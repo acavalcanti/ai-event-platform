@@ -33,23 +33,36 @@ The AI Event Platform ensures comprehensive decision traceability through the us
 
 ### What is Logged?
 
-The Decision Log captures the following information for each decision:
+The Decision Log captures the following information for each governance decision:
 
-- **Decision ID**: A unique identifier for the decision.
-- **Timestamp**: The time when the decision was made.
-- **Decision**: The specific action taken (e.g., approve, reject).
-- **User**: The user who made the decision.
-- **Policy Version**: Policy Version.
+- **Decision ID**: Unique identifier for the decision.
+- **Workflow Execution ID**: Associated orchestration workflow execution.
+- **Proposal ID**: Identifier of the generated proposal.
+- **Timestamp**: Time of the decision.
+- **Policy Result**: Outcome of deterministic policy evaluation.
+- **Approver Identity**: User or system actor responsible for approval.
+- **Execution Outcome**: Final execution result.
+- **Policy Version**: Version of the policy rules used during evaluation.
+- **Orchestration Context**: Relevant workflow orchestration metadata.
+- **Reasoning Summary**: High-level summary of the reasoning context.
 
 ### Example Entry
 
 ```json
 {
-  "decision_id": "12345",
+  "decision_id": "dec_123",
+  "workflow_execution_id": "wf_998",
+  "proposal_id": "prop_456",
   "timestamp": "2023-10-05T10:00:00Z",
-  "decision": "approved",
-  "user": "admin_user",
-  "policy_version": "v1"
+  "policy_result": "approved",
+  "approver_identity": "executive_approver",
+  "execution_outcome": "published",
+  "policy_version": "v1",
+  "orchestration_context": {
+    "event_id": "evt_789",
+    "workflow_stage": "interaction_review"
+  },
+  "reasoning_summary": "Interaction approved for external publishing after policy validation."
 }
 ```
 

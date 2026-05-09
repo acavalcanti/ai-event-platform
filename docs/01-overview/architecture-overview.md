@@ -38,14 +38,14 @@ Coordinates deterministic agent workflows using LangGraph orchestration.
 
 Components:
 - LangGraph Orchestrator
-- Agent Coordination
+- AI Reasoning Coordination
 - Shared Workflow State
 
 ---
 
 ### Shared State & Decision Layer
 
-Stores orchestration state, interaction state, and decision logs used by agents and workflows.
+Stores orchestration state, interaction state, and decision logs used by orchestration workflows and governance processes
 
 Components:
 - Event State
@@ -70,10 +70,10 @@ Components:
 The platform is built around several key components that work together to achieve its goals.
 
 - **Event Service**: Manages event blueprints and event lifecycle orchestration.
-- **Template Service**: Manages reusable workflow structures and event blueprint definitions.
+- **Blueprint Service**: Manages reusable workflow structures and event blueprint definitions.
 - **Interaction Service**: Facilitates real-time and approval-based interactions.
 - **Governance Service** ensures compliance, auditability, RBAC enforcement, and policy validation across orchestration workflows.
-- **AI Orchestration Layer**: Orchestrates the agent system using LangGraph.
+- **AI Orchestration Layer**: Coordinates deterministic AI-assisted workflows using LangGraph orchestration.
 
 ## System Flow
 
@@ -81,7 +81,7 @@ The AI Event Platform follows a structured flow to ensure seamless event orchest
 
 1. **Event Creation**:
    - The **Event Service** creates an event blueprint, which includes modular stages.
-   - The **The Blueprint Service** manages reusable workflow structures and event blueprint definitions.
+   - The **Blueprint Service** manages reusable workflow structures and event blueprint definitions.
 
 2. **Real-time Interactions**:
    - The **Interaction Service** handles real-time interactions using the **Interaction Engine**, which supports both real-time and approval-based processes.
@@ -134,51 +134,66 @@ Used across orchestration and services to provide:
 ```mermaid
 flowchart TD
 
-    UI[Clients / Dashboard]
-    API[API Gateway]
+    UI[User Interfaces]
+    API[API Layer]
 
     subgraph APP[Application Services]
         ES[Event Service]
-        BS[Blueprint Service]
         IS[Interaction Service]
+        BS[Blueprint Service]
         GS[Governance Service]
     end
 
-    subgraph AI[AI Orchestration Layer]
+    subgraph ORCHESTRATION[AI Orchestration]
         ORCH[LangGraph Orchestrator]
         RNODES[AI Reasoning Nodes]
+        POLICY[Policy Engine]
     end
 
-    subgraph STATE[Shared State & Decision Layer]
-        STATESTORE[Event State]
-        DECISIONLOG[Decision Log]
+    subgraph EXECUTION[Async Execution]
+        OUTBOX[Transactional Outbox]
+        WORKER[Deterministic Workers]
     end
 
-    subgraph EXT[Integration Layer]
+    subgraph STORAGE[Persistence]
+        DOMAINDB[(PostgreSQL Domain State)]
+        STATESTORE[(LangGraph Checkpoints)]
+        DECISIONLOG[(Decision Log)]
+    end
+
+    subgraph EXTERNAL[External Systems]
         WA[WhatsApp]
         IG[Instagram]
-        PORTAL[Internal Portal]
+        PORTAL[Corporate Portal]
     end
 
     UI --> API
 
     API --> ES
-    API --> TS
     API --> IS
-    API --> GS
+
+    ES --> DOMAINDB
+    IS --> DOMAINDB
+    BS --> DOMAINDB
+
+    IS --> OUTBOX
+    OUTBOX --> WORKER
+
+    WORKER --> WA
+    WORKER --> IG
+    WORKER --> PORTAL
 
     ES --> ORCH
-    TS --> ORCH
     IS --> ORCH
 
-    ORCH <--> RNODES
+    ORCH <--> STATESTORE
+    ORCH --> RNODES
+    RNODES --> ORCH
 
-    RNODES <--> STATESTORE
-    RNODES --> DECISIONLOG
+    ORCH --> POLICY
+    POLICY --> DECISIONLOG
 
-    IS --> WA
-    IS --> IG
-    IS --> PORTAL
+    ORCH --> DECISIONLOG
 ```
 
 ## Status

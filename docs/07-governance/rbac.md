@@ -36,6 +36,11 @@ The AI Event Platform defines several roles with associated permissions:
    - Ensure compliance with organizational policies and regulations.
    - Monitor and audit user activities.
 
+6. **Executive Approver**:
+   - Approve high-impact workflow transitions.
+   - Authorize external public communications.
+   - Review escalation requests from governance workflows.
+
 ## Implementation
 
 The RBAC implementation in the AI Event Platform includes:
