@@ -39,6 +39,7 @@ The Decision Log captures the following information for each decision:
 - **Timestamp**: The time when the decision was made.
 - **Decision**: The specific action taken (e.g., approve, reject).
 - **User**: The user who made the decision.
+- **Policy Version**: Policy Version.
 
 ### Example Entry
 
@@ -47,7 +48,8 @@ The Decision Log captures the following information for each decision:
   "decision_id": "12345",
   "timestamp": "2023-10-05T10:00:00Z",
   "decision": "approved",
-  "user": "admin_user"
+  "user": "admin_user",
+  "policy_version": "v1"
 }
 ```
 

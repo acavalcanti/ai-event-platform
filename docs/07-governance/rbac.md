@@ -24,9 +24,9 @@ The AI Event Platform defines several roles with associated permissions:
    - Schedule and coordinate events.
    - Monitor event progress.
 
-3. **Template Manager**:
-   - Create and manage event templates.
-   - Reuse templates across different events.
+3. **Blueprint Manager**:
+   - Create and manage event blueprint definitions.
+   - Maintain reusable workflow structures for event orchestration.
 
 4. **Interaction Manager**:
    - Handle real-time interactions between users and the system.

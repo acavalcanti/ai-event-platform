@@ -1,10 +1,10 @@
 # AI Event Platform
 
-A multi-agent AI platform for orchestrating corporate events with deterministic workflows, real-time interactions, and human oversight.
+A deterministic AI-assisted orchestration platform for orchestrating corporate events with deterministic workflows, real-time interactions, and human oversight.
 
 Corporate events involve complex coordination between internal teams, vendors, stakeholders, and participants.
 
-This project explores how multi-agent AI systems can orchestrate these workflows through modular execution, real-time interaction pipelines, and governance mechanisms.
+This project explores how agent AI systems can orchestrate these workflows through modular execution, real-time interaction pipelines, and governance mechanisms.
 
 ## Key Features
 
@@ -18,7 +18,7 @@ This project explores how multi-agent AI systems can orchestrate these workflows
 The platform is built on a layered architecture that ensures scalability, reliability, and ease of maintenance:
 
 - **Event Service Layer**: Manages the creation and management of event blueprints.
-- **Template Service Layer**: Manages reusable event workflow definitions and orchestration templates.
+- **Blueprint Service Layer**: Manages reusable event workflow structures and event blueprint definitions.
 - **Interaction Service Layer**: Facilitates real-time and approval-based interactions during events.
 - **Governance Service Layer**: Ensures compliance and auditability through governance mechanisms.
 - **AI Orchestration Layer**: Orchestrates the system using LangGraph for deterministic orchestration.
@@ -31,7 +31,7 @@ The AI Event Platform is designed to explore how agent systems can coordinate co
 - real-time interactions
 - external integrations
 - governance and approvals
-- reusable event orchestration patterns
+- modular event orchestration structures
 
 The platform prioritizes:
 - deterministic execution

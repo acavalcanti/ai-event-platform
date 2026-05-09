@@ -39,6 +39,12 @@ The domain state includes:
 
 The LangGraph Orchestrator maintains orchestration runtime state.
 
+The LangGraph checkpoint state is orchestration metadata only.
+
+Interaction lifecycle state remains authoritative in PostgreSQL domain services.
+
+LangGraph checkpoints do not act as the source of truth for business state transitions.
+
 This state exists exclusively to support:
 - workflow execution
 - resumability

@@ -2,7 +2,7 @@
 
 ## Architecture Layers
 
-The AI Event Platform is organized into layered domains that separate orchestration, interaction, governance, and reusable event management capabilities.
+The AI Event Platform is organized into layered domains that separate orchestration, interaction, governance, and modular event orchestration capabilities.
 
 ### Client Layer
 Interfaces used by operators, stakeholders, and participants.
@@ -21,8 +21,8 @@ Core business services responsible for event lifecycle management.
 #### Event Service
 Manages event blueprints, stages, and execution lifecycle.
 
-#### Template Service
-Manages reusable event workflow definitions and orchestration templates.
+#### Blueprint Service
+Manages reusable event workflow structures and event blueprint definitions.
 
 #### Interaction Service
 Processes real-time interactions, approval workflows, and external communication pipelines.
@@ -34,7 +34,7 @@ Provides auditability, RBAC, compliance controls, and policy enforcement.
 
 ### AI Orchestration Layer
 
-Coordinates deterministic multi-agent workflows using LangGraph orchestration.
+Coordinates deterministic agent workflows using LangGraph orchestration.
 
 Components:
 - LangGraph Orchestrator
@@ -69,8 +69,8 @@ Components:
 
 The platform is built around several key components that work together to achieve its goals.
 
-- **Event Service**: Manages event blueprints and templates.
-- **Template Service**: Handles reusable templates and multi-event support.
+- **Event Service**: Manages event blueprints and event lifecycle orchestration.
+- **Template Service**: Manages reusable workflow structures and event blueprint definitions.
 - **Interaction Service**: Facilitates real-time and approval-based interactions.
 - **Governance Service** ensures compliance, auditability, RBAC enforcement, and policy validation across orchestration workflows.
 - **AI Orchestration Layer**: Orchestrates the agent system using LangGraph.
@@ -81,7 +81,7 @@ The AI Event Platform follows a structured flow to ensure seamless event orchest
 
 1. **Event Creation**:
    - The **Event Service** creates an event blueprint, which includes modular stages.
-   - The **Template Service** manages reusable templates and ensures multi-event support.
+   - The **The Blueprint Service** manages reusable workflow structures and event blueprint definitions.
 
 2. **Real-time Interactions**:
    - The **Interaction Service** handles real-time interactions using the **Interaction Engine**, which supports both real-time and approval-based processes.
@@ -139,14 +139,14 @@ flowchart TD
 
     subgraph APP[Application Services]
         ES[Event Service]
-        TS[Template Service]
+        BS[Blueprint Service]
         IS[Interaction Service]
         GS[Governance Service]
     end
 
     subgraph AI[AI Orchestration Layer]
         ORCH[LangGraph Orchestrator]
-        AGENTS[AI Agents]
+        RNODES[AI Reasoning Nodes]
     end
 
     subgraph STATE[Shared State & Decision Layer]
@@ -171,10 +171,10 @@ flowchart TD
     TS --> ORCH
     IS --> ORCH
 
-    ORCH <--> AGENTS
+    ORCH <--> RNODES
 
-    AGENTS <--> STATESTORE
-    AGENTS --> DECISIONLOG
+    RNODES <--> STATESTORE
+    RNODES --> DECISIONLOG
 
     IS --> WA
     IS --> IG
