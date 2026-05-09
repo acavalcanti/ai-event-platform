@@ -34,7 +34,7 @@ Provides auditability, RBAC, compliance controls, and policy enforcement.
 
 ### AI Orchestration Layer
 
-Coordinates deterministic agent workflows using LangGraph orchestration.
+Coordinates deterministic AI-assisted workflows using LangGraph orchestration.
 
 Components:
 - LangGraph Orchestrator
@@ -88,11 +88,11 @@ The AI Event Platform follows a structured flow to ensure seamless event orchest
    - The **Governance Service** ensures compliance, auditability, RBAC enforcement, and policy validation across orchestration workflows.
 
 3. **Orchestration**:
-   - The **AI Orchestration Layer** uses LangGraph for deterministic orchestration, coordinating the agent system efficiently.
+   - The **AI Orchestration Layer** uses LangGraph for deterministic orchestration, coordinating deterministic orchestration workflows efficiently.
 
 ## Shared State & Decision Log
 
-Stores event state, interactions, and audit records used by agents and orchestration flows.
+Stores event state, interactions, and audit records used by orchestration workflows and governance processes.
 
 ---
 
@@ -107,7 +107,7 @@ Owned by the LangGraph Orchestrator.
 Stores:
 - workflow execution state
 - stage transitions
-- agent coordination state
+- reasoning coordination state
 - orchestration checkpoints
 
 ### Domain State
